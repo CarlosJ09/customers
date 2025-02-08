@@ -1,13 +1,21 @@
 import { lazy } from "react";
+import BaseLayout from "@/layouts/BaseLayout";
 
+const SignIn = lazy(() => import("@/pages/SignIn"));
+const SignUp = lazy(() => import("@/pages/SignUp"));
 const Home = lazy(() => import("@/pages/Home"));
 
-const routes = [
+export const customRoutes = [
   {
     path: "/",
-    name: "Home",
-    component: Home,
+    layout: BaseLayout,
+    children: [{ path: "/", element: Home }],
+  },
+  {
+    path: "/auth",
+    children: [
+      { path: "sign-in", element: SignIn },
+      { path: "sign-up", element: SignUp },
+    ],
   },
 ];
-
-export default routes;

@@ -1,5 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.authentication import TokenAuthentication
+
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from ..models import Customer, Country, State, City, Address
 from ..serializers import (
@@ -11,12 +12,8 @@ from ..serializers import (
 )
 
 
-class BearerTokenAuthentication(TokenAuthentication):
-    keyword = "Bearer"
-
-
 class BaseViewSet(viewsets.ModelViewSet):
-    authentication_classes = [BearerTokenAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
 

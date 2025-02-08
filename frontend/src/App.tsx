@@ -1,17 +1,34 @@
 import { Suspense } from "react";
-import { Routes, Route } from "react-router";
-import routes from "@/router/routes";
+import { Routes, Route, Outlet } from "react-router";
+import { customRoutes } from "@/router/routes";
+import { AuthProvider } from "@/context/AuthContext";
 import Fallback from "@/components/ui/fallback";
 
 function App() {
   return (
-    <Suspense fallback={<Fallback />}>
-      <Routes>
-        {routes.map((route, index) => (
-          <Route key={index} path={route.path} element={<route.component />} />
-        ))}
-      </Routes>
-    </Suspense>
+    <AuthProvider>
+      <Suspense fallback={<Fallback />}>
+        <Routes>
+          {customRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                route.layout ? (
+                  <route.layout>{route.children && <Outlet />}</route.layout>
+                ) : (
+                  <Outlet />
+                )
+              }
+            >
+              {route.children?.map((child) => (
+                <Route key={child.path} path={child.path} element={<child.element />} />
+              ))}
+            </Route>
+          ))}
+        </Routes>
+      </Suspense>
+    </AuthProvider>
   );
 }
 

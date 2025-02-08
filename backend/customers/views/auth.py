@@ -1,15 +1,14 @@
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny
-from rest_framework.authentication import TokenAuthentication
 
 
 class RegisterUserView(APIView):
-    """Register a new user and return a token"""
+    """Register a new user and return access & refresh tokens"""
 
     permission_classes = [AllowAny]
 
@@ -30,13 +29,19 @@ class RegisterUserView(APIView):
             )
 
         user = User.objects.create_user(username=username, password=password)
-        token, _ = Token.objects.get_or_create(user=user)
 
-        return Response({"token": token.key}, status=status.HTTP_201_CREATED)
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginUserView(APIView):
-    """Login user and return a token"""
+    """Login user and return access & refresh tokens"""
 
     permission_classes = [AllowAny]
 
@@ -45,24 +50,47 @@ class LoginUserView(APIView):
         password = request.data.get("password")
 
         user = authenticate(username=username, password=password)
-
         if not user:
             return Response(
                 {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
-        token, _ = Token.objects.get_or_create(user=user)
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            },
+            status=status.HTTP_200_OK,
+        )
 
-        return Response({"token": token.key}, status=status.HTTP_200_OK)
+
+class RefreshTokenView(APIView):
+    """Get a new access token using a refresh token"""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+
+        serializer = TokenRefreshSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutUserView(APIView):
-    """Logout user by deleting their token"""
-
-    authentication_classes = [TokenAuthentication]
+    """Blacklist the refresh token"""
 
     def post(self, request):
-        request.auth.delete()
-        return Response(
-            {"message": "Logged out successfully"}, status=status.HTTP_200_OK
-        )
+        try:
+            refresh_token = request.data.get("refresh")
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(
+                {"message": "Logged out successfully"}, status=status.HTTP_200_OK
+            )
+        except Exception as _:
+            return Response(
+                {"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+            )
