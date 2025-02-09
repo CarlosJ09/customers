@@ -7,7 +7,7 @@ import Fallback from "@/components/ui/fallback";
 function App() {
   return (
     <AuthProvider>
-      <Suspense fallback={<Fallback />}>
+      <Suspense fallback={<Fallback isLoading />}>
         <Routes>
           {customRoutes.map((route) => (
             <Route

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router";
 import {
   Grid,
   Button,
@@ -11,6 +12,9 @@ import {
   createListCollection,
   ListCollection,
   Container,
+  HStack,
+  IconButton,
+  Text,
 } from "@chakra-ui/react";
 import {
   SelectRoot,
@@ -20,8 +24,11 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "@/components/ui/select";
+import { Toaster, toaster } from "@/components/ui/toaster";
+import { FiArrowLeft } from "react-icons/fi";
 import { addressService } from "@/services/AddressService";
 import { customerService } from "@/services/CustomerService";
+import Fallback from "@/components/ui/fallback";
 
 const initListCollection = createListCollection({
   items: [],
@@ -31,16 +38,18 @@ const CreateCustomerPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-
   const [countries, setCountries] = useState<ListCollection>(initListCollection);
   const [states, setStates] = useState<ListCollection>(initListCollection);
   const [cities, setCities] = useState<ListCollection>(initListCollection);
-
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<number | null>(null);
   const [selectedState, setSelectedState] = useState<number | null>(null);
   const [selectedCity, setSelectedCity] = useState<number | null>(null);
   const [street, setStreet] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCountries();
@@ -99,28 +108,49 @@ const CreateCustomerPage = () => {
         },
       ],
     };
+    setLoading(true);
 
-    const response = await customerService.create(customerData);
-    if (response.status === 201) {
-      alert("Customer created successfully!");
-      // TODO: redirect or reset form here
-    } else {
-      alert("Error creating customer.");
+    try {
+      const response = await customerService.create(customerData);
+      if (response.status === 201) {
+        toaster.create({ title: "Customer created successfully!" });
+        navigate("/customers");
+      } else if (response.status === 400) {
+        toaster.error({ title: "Fill all the required fields" });
+      }
+    } catch (error) {
+      toaster.error({ title: "Error creating customer." });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Container maxW={"4xl"} p={4}>
-      <Heading as="h1" size="xl" mb={5}>
-        Create Customer
-      </Heading>
+      <Toaster />
+
+      <Fallback isLoading={loading} />
+
+      <HStack mb={6}>
+        <Link to={"/"}>
+          <IconButton size="xs" mr={2}>
+            <FiArrowLeft />
+          </IconButton>
+        </Link>
+
+        <Heading as="h1" size="xl" textAlign={"center"}>
+          Create Customer
+        </Heading>
+      </HStack>
 
       <VStack gap={4} align="stretch">
         {/* Customer Info */}
         <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
           <Box>
-            <Field.Root>
-              <Field.Label>Name</Field.Label>
+            <Field.Root required>
+              <Field.Label>
+                Name <Text color={"red"}>*</Text>
+              </Field.Label>
               <Input
                 value={name}
                 placeholder="Enter name"
@@ -131,8 +161,10 @@ const CreateCustomerPage = () => {
           </Box>
 
           <Box>
-            <Field.Root>
-              <Field.Label>Email</Field.Label>
+            <Field.Root required>
+              <Field.Label>
+                Email <Text color={"red"}>*</Text>
+              </Field.Label>
               <Input
                 value={email}
                 placeholder="Enter email"
@@ -163,6 +195,15 @@ const CreateCustomerPage = () => {
             Addresses
           </Fieldset.Legend>
 
+          <Box>
+            {addresses.map((address) => (
+              <Box>
+                {address.name}
+                {address.name}
+              </Box>
+            ))}
+          </Box>
+
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
             <Box>
               <SelectRoot
@@ -173,7 +214,11 @@ const CreateCustomerPage = () => {
                   fetchStates(Number(country.value[0]));
                 }}
               >
-                <SelectLabel>Country</SelectLabel>
+                <SelectLabel>
+                  <HStack gap={1}>
+                    Country<Text color={"red"}>*</Text>
+                  </HStack>
+                </SelectLabel>
                 <SelectTrigger>
                   <SelectValueText placeholder="Select country" />
                 </SelectTrigger>
@@ -197,7 +242,11 @@ const CreateCustomerPage = () => {
                 }}
                 disabled={!selectedCountry}
               >
-                <SelectLabel>State</SelectLabel>
+                <SelectLabel>
+                  <HStack gap={1}>
+                    State<Text color={"red"}>*</Text>
+                  </HStack>
+                </SelectLabel>
                 <SelectTrigger>
                   <SelectValueText placeholder="Select state" />
                 </SelectTrigger>
@@ -212,29 +261,38 @@ const CreateCustomerPage = () => {
             </Box>
           </Grid>
 
-          <SelectRoot
-            size="md"
-            collection={cities}
-            onValueChange={(city) => setSelectedCity(Number(city.value[0]))}
-            disabled={!selectedState}
-          >
-            <SelectLabel>City</SelectLabel>
-            <SelectTrigger>
-              <SelectValueText placeholder="Select city" />
-            </SelectTrigger>
-            <SelectContent>
-              {cities.items.map((city) => (
-                <SelectItem key={city.value} item={city}>
-                  {city.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectRoot>
-
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
             <Box>
+              <SelectRoot
+                size="md"
+                collection={cities}
+                onValueChange={(city) => setSelectedCity(Number(city.value[0]))}
+                disabled={!selectedState}
+              >
+                <SelectLabel>
+                  <HStack gap={1}>
+                    City<Text color={"red"}>*</Text>
+                  </HStack>
+                </SelectLabel>
+                <SelectTrigger>
+                  <SelectValueText placeholder="Select city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.items.map((city) => (
+                    <SelectItem key={city.value} item={city}>
+                      {city.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </SelectRoot>
+            </Box>
+
+            <Box>
               <Field.Root>
-                <Field.Label>Street</Field.Label>
+                <Field.Label>
+                  Street
+                  <Text color={"red"}>*</Text>
+                </Field.Label>
                 <Input
                   value={street}
                   placeholder="Enter street"
@@ -243,7 +301,9 @@ const CreateCustomerPage = () => {
                 />
               </Field.Root>
             </Box>
+          </Grid>
 
+          <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
             <Box>
               <Field.Root>
                 <Field.Label>Postal Code</Field.Label>
@@ -259,7 +319,7 @@ const CreateCustomerPage = () => {
         </Fieldset.Root>
 
         {/* Submit Button */}
-        <Button w="full" mt={4} onClick={handleSubmit}>
+        <Button maxW={"lg"} w="full" mt={4} mx={"auto"} onClick={handleSubmit}>
           Create Customer
         </Button>
       </VStack>

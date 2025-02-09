@@ -25,11 +25,28 @@ class CitySerializer(serializers.ModelSerializer):
 
 
 class AddressSerializer(serializers.ModelSerializer):
-    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
+    city = serializers.PrimaryKeyRelatedField(
+        queryset=City.objects.all(), write_only=True
+    )
+    city_detail = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Address
-        fields = ["street", "city", "zip_code"]
+        fields = ["street", "city", "zip_code", "city_detail"]
+
+    def get_city_detail(self, obj):
+        return CitySerializer(obj.city).data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+
+        if request and request.method in ["GET"]:
+            data["city"] = data.pop("city_detail")
+        else:
+            data.pop("city_detail", None)
+
+        return data
 
 
 class CustomerSerializer(serializers.ModelSerializer):
