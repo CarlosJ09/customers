@@ -7,16 +7,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (loading) {
-      return;
-    }
-
-    if (!user) {
+    if (!loading && !user) {
       navigate("/auth/sign-in", { replace: true });
     }
   }, [loading, user]);
 
-  return <>{children}</>;
+  return loading ? <p>Loading...</p> : <>{children}</>;
 };
 
 export default ProtectedRoute;

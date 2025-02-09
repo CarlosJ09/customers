@@ -3,7 +3,7 @@ import { Box, Button, Input, VStack, Heading, Field, Text, Image } from "@chakra
 import { useNavigate } from "react-router";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/interceptor/axios";
+import axios from "axios";
 import logo from "@/assets/oriontek_logo.jpg";
 
 const SignIn = () => {
@@ -23,19 +23,19 @@ const SignIn = () => {
         return;
       }
 
-      const response = await api.post("/auth/login/", credentials, {
+      const response = await axios.post("/auth/login/", credentials, {
         baseURL: `${import.meta.env.VITE_BACKENDHOST}/api`,
       });
       const data = response.data;
 
       if (response.status === 200) {
-        login(data.access);
-        navigate("/");
-      } else if (response.status === 401) {
-        toaster.error({ title: data.error });
+        login(data.access, data.refresh);
       }
-    } catch (error) {
-      console.error("Login failed", error);
+    } catch (error: any) {
+      if (error.response.status === 401) {
+        toaster.error({ title: error.response.data.error });
+        return;
+      }
       toaster.error({ title: "Error occurred. Please try again." });
     }
   };

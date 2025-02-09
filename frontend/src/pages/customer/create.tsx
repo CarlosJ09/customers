@@ -9,6 +9,7 @@ import {
   Field,
   Fieldset,
   createListCollection,
+  ListCollection,
   Container,
 } from "@chakra-ui/react";
 import {
@@ -21,15 +22,9 @@ import {
 } from "@/components/ui/select";
 import { addressService } from "@/services/AddressService";
 import { customerService } from "@/services/CustomerService";
-import { Country, State, City } from "@/types/address";
 
-const frameworks = createListCollection({
-  items: [
-    { label: "React.js", value: "react" },
-    { label: "Vue.js", value: "vue" },
-    { label: "Angular", value: "angular" },
-    { label: "Svelte", value: "svelte" },
-  ],
+const initListCollection = createListCollection({
+  items: [],
 });
 
 const CreateCustomerPage = () => {
@@ -37,24 +32,15 @@ const CreateCustomerPage = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [states, setStates] = useState<State[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
+  const [countries, setCountries] = useState<ListCollection>(initListCollection);
+  const [states, setStates] = useState<ListCollection>(initListCollection);
+  const [cities, setCities] = useState<ListCollection>(initListCollection);
 
   const [selectedCountry, setSelectedCountry] = useState<number | null>(null);
   const [selectedState, setSelectedState] = useState<number | null>(null);
   const [selectedCity, setSelectedCity] = useState<number | null>(null);
   const [street, setStreet] = useState("");
   const [postalCode, setPostalCode] = useState("");
-
-  const frameworks = createListCollection({
-    items: [
-      { label: "React.js", value: "react" },
-      { label: "Vue.js", value: "vue" },
-      { label: "Angular", value: "angular" },
-      { label: "Svelte", value: "svelte" },
-    ],
-  });
 
   useEffect(() => {
     fetchCountries();
@@ -63,23 +49,39 @@ const CreateCustomerPage = () => {
   const fetchCountries = async () => {
     const response = await addressService.getCountries();
     if (response.status === 200) {
-      setCountries(response.data);
+      const data = response.data.map((country) => ({
+        label: country.name,
+        value: country.id,
+      }));
+      const countriesCollection = createListCollection({ items: data });
+      setCountries(countriesCollection);
     }
   };
 
   const fetchStates = async (countryId: number) => {
     const response = await addressService.getStatesByCountry(countryId);
     if (response.status === 200) {
-      setStates(response.data);
+      const data = response.data.map((state) => ({
+        label: state.name,
+        value: state.id,
+      }));
+      const statesCollection = createListCollection({ items: data });
+      setStates(statesCollection);
+      setCities(initListCollection);
       setSelectedState(null);
-      setCities([]);
     }
   };
 
   const fetchCities = async (stateId: number) => {
     const response = await addressService.getCitiesByState(stateId);
     if (response.status === 200) {
-      setCities(response.data);
+      const data = response.data.map((city) => ({
+        label: city.name,
+        value: city.id,
+      }));
+      const citiesCollection = createListCollection({ items: data });
+      setCities(citiesCollection);
+
       setSelectedCity(null);
     }
   };
@@ -89,11 +91,13 @@ const CreateCustomerPage = () => {
       name,
       email,
       phone,
-      addresses: {
-        city: selectedCity,
-        street,
-        postal_code: postalCode,
-      },
+      addresses: [
+        {
+          city: selectedCity,
+          street,
+          postal_code: postalCode,
+        },
+      ],
     };
 
     const response = await customerService.create(customerData);
@@ -117,14 +121,24 @@ const CreateCustomerPage = () => {
           <Box>
             <Field.Root>
               <Field.Label>Name</Field.Label>
-              <Input placeholder="Enter name" w="full" />
+              <Input
+                value={name}
+                placeholder="Enter name"
+                w="full"
+                onChange={(e) => setName(e.target.value)}
+              />
             </Field.Root>
           </Box>
 
           <Box>
             <Field.Root>
               <Field.Label>Email</Field.Label>
-              <Input placeholder="Enter email" w="full" />
+              <Input
+                value={email}
+                placeholder="Enter email"
+                w="full"
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </Field.Root>
           </Box>
         </Grid>
@@ -133,13 +147,17 @@ const CreateCustomerPage = () => {
           <Box>
             <Field.Root>
               <Field.Label>Phone</Field.Label>
-              <Input placeholder="Enter phone" w="full" />
+              <Input
+                value={phone}
+                placeholder="Enter phone"
+                w="full"
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </Field.Root>
           </Box>
           <Box></Box>
         </Grid>
 
-        {/* Address Section */}
         <Fieldset.Root>
           <Fieldset.Legend as="h3" fontWeight="semibold" fontSize="lg" mt={4}>
             Addresses
@@ -147,22 +165,21 @@ const CreateCustomerPage = () => {
 
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
             <Box>
-              <SelectRoot size="md" collection={frameworks}>
+              <SelectRoot
+                size="md"
+                collection={countries}
+                onValueChange={(country) => {
+                  setSelectedCountry(Number(country.value[0]));
+                  fetchStates(Number(country.value[0]));
+                }}
+              >
                 <SelectLabel>Country</SelectLabel>
                 <SelectTrigger>
                   <SelectValueText placeholder="Select country" />
                 </SelectTrigger>
                 <SelectContent>
-                  {frameworks.items.map((country) => (
-                    <SelectItem
-                      key={country.value}
-                      item={country}
-                      onChange={(e) => {
-                        const countryId = Number(e.target.value);
-                        setSelectedCountry(countryId);
-                        fetchStates(countryId);
-                      }}
-                    >
+                  {countries?.items.map((country) => (
+                    <SelectItem key={country.value} item={country}>
                       {country.label}
                     </SelectItem>
                   ))}
@@ -171,22 +188,22 @@ const CreateCustomerPage = () => {
             </Box>
 
             <Box>
-              <SelectRoot size="md" collection={frameworks} disabled={!selectedCountry}>
+              <SelectRoot
+                size="md"
+                collection={states}
+                onValueChange={(state) => {
+                  setSelectedState(Number(state.value[0]));
+                  fetchCities(Number(state.value[0]));
+                }}
+                disabled={!selectedCountry}
+              >
                 <SelectLabel>State</SelectLabel>
                 <SelectTrigger>
                   <SelectValueText placeholder="Select state" />
                 </SelectTrigger>
                 <SelectContent>
-                  {frameworks.items.map((state) => (
-                    <SelectItem
-                      key={state.value}
-                      item={state}
-                      onChange={(e) => {
-                        const stateId = Number(e.target.value);
-                        setSelectedState(stateId);
-                        fetchCities(stateId);
-                      }}
-                    >
+                  {states.items.map((state) => (
+                    <SelectItem key={state.value} item={state}>
                       {state.label}
                     </SelectItem>
                   ))}
@@ -195,18 +212,19 @@ const CreateCustomerPage = () => {
             </Box>
           </Grid>
 
-          <SelectRoot size="md" collection={frameworks} disabled={!selectedState}>
+          <SelectRoot
+            size="md"
+            collection={cities}
+            onValueChange={(city) => setSelectedCity(Number(city.value[0]))}
+            disabled={!selectedState}
+          >
             <SelectLabel>City</SelectLabel>
             <SelectTrigger>
               <SelectValueText placeholder="Select city" />
             </SelectTrigger>
             <SelectContent>
-              {frameworks.items.map((city) => (
-                <SelectItem
-                  key={city.value}
-                  item={city}
-                  onChange={(e) => setSelectedCity(Number(e.target.value))}
-                >
+              {cities.items.map((city) => (
+                <SelectItem key={city.value} item={city}>
                   {city.label}
                 </SelectItem>
               ))}
@@ -217,21 +235,31 @@ const CreateCustomerPage = () => {
             <Box>
               <Field.Root>
                 <Field.Label>Street</Field.Label>
-                <Input placeholder="Enter street" w="full" />
+                <Input
+                  value={street}
+                  placeholder="Enter street"
+                  w="full"
+                  onChange={(e) => setStreet(e.target.value)}
+                />
               </Field.Root>
             </Box>
 
             <Box>
               <Field.Root>
                 <Field.Label>Postal Code</Field.Label>
-                <Input placeholder="Enter postal code" w="full" />
+                <Input
+                  placeholder="Enter postal code"
+                  w="full"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                />
               </Field.Root>
             </Box>
           </Grid>
         </Fieldset.Root>
 
         {/* Submit Button */}
-        <Button w="full" mt={4}>
+        <Button w="full" mt={4} onClick={handleSubmit}>
           Create Customer
         </Button>
       </VStack>

@@ -1,12 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { getToken, setToken, removeToken } from "@/utils/auth";
-import { ACCESS_TOKEN_KEY } from "@/constants/token";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/token";
 import { useNavigate } from "react-router";
 
 interface AuthContextType {
   user: { token: string } | null;
   loading: boolean;
-  login: (token: string) => void;
+  login: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
 }
 
@@ -25,15 +25,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = (token: string) => {
-    setToken(ACCESS_TOKEN_KEY, token);
-    setUser({ token });
+  const login = (accessToken: string, refreshToken: string) => {
+    setToken(ACCESS_TOKEN_KEY, accessToken);
+    setToken(REFRESH_TOKEN_KEY, refreshToken);
+    setUser({ token: accessToken });
+    navigate("/");
   };
 
   const logout = () => {
     removeToken(ACCESS_TOKEN_KEY);
+    removeToken(REFRESH_TOKEN_KEY);
     setUser(null);
-    navigate("/");
+    navigate("/auth/sign-in");
   };
 
   return (
