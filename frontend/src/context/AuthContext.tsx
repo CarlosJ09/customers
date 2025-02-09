@@ -4,6 +4,7 @@ import { ACCESS_TOKEN_KEY } from "@/constants/token";
 
 interface AuthContextType {
   user: { token: string } | null;
+  loading: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -12,12 +13,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<{ token: string } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = getToken(ACCESS_TOKEN_KEY);
     if (token) {
       setUser({ token });
     }
+    setLoading(false);
   }, []);
 
   const login = (token: string) => {
@@ -30,7 +33,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>
+  );
 };
 
 export const useAuth = (): AuthContextType => {

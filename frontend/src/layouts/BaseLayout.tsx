@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import ProtectedRoute from "@/router/ProtectedRoute";
-import { Box } from "@chakra-ui/react";
+import DrawerWrapper from "@/components/ui/drawer";
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,7 +9,7 @@ interface LayoutProps {
 export const BaseLayout = ({ children }: LayoutProps) => {
   return (
     <ProtectedRoute>
-      <Box minH="100vh">{children}</Box>;
+      <DrawerWrapper>{children}</DrawerWrapper>
     </ProtectedRoute>
   );
 };

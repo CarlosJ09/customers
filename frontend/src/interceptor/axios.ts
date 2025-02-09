@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKENDHOST,
+  baseURL: `${import.meta.env.VITE_BACKENDHOST}/api`,
 });
 
 api.interceptors.request.use(
@@ -12,7 +12,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => error.response
 );
 
 api.interceptors.response.use(
@@ -29,8 +29,8 @@ api.interceptors.response.use(
         console.warn("No refresh token available. Logging out.");
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = "/login";
-        return Promise.reject(error);
+        /*   window.location.href = "/login"; */
+        return error.response;
       }
 
       try {
@@ -44,11 +44,11 @@ api.interceptors.response.use(
         console.error("Token refresh failed. Logging out.");
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
-        window.location.href = "/login";
+        /*   window.location.href = "/login"; */
         return Promise.reject(refreshError);
       }
     }
 
-    return Promise.reject(error);
+    return error.response;
   }
 );
