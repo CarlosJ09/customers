@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { getToken, setToken, removeToken } from "@/utils/auth";
 import { ACCESS_TOKEN_KEY } from "@/constants/token";
+import { useNavigate } from "react-router";
 
 interface AuthContextType {
   user: { token: string } | null;
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<{ token: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = getToken(ACCESS_TOKEN_KEY);
@@ -31,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     removeToken(ACCESS_TOKEN_KEY);
     setUser(null);
+    navigate("/");
   };
 
   return (

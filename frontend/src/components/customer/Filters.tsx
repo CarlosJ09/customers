@@ -9,7 +9,6 @@ import {
   SelectValueText,
 } from "@/components/ui/select";
 import { addressService } from "@/services/AddressService";
-import { City, Country, State } from "@/types/address";
 
 type FiltersProps = {
   filterText: string;
@@ -23,8 +22,7 @@ const initListCollection = createListCollection({
 });
 
 function Filters({ filterText, onFilterTextChange, status, onStatusChange }: FiltersProps) {
-  const [countriesCollection, setCountriesCollection] =
-    useState<ListCollection>(initListCollection);
+  const [countries, setCountries] = useState<ListCollection>(initListCollection);
   const [states, setStates] = useState<ListCollection>(initListCollection);
 
   useEffect(() => {
@@ -32,8 +30,8 @@ function Filters({ filterText, onFilterTextChange, status, onStatusChange }: Fil
   }, []);
 
   useEffect(() => {
-    if (countriesCollection.items.length > 0) {
-      const countryId = countriesCollection.items[0].value;
+    if (countries.items.length > 0) {
+      const countryId = countries.items[0].value;
       fetchStates(countryId);
     }
   }, []);
@@ -46,8 +44,8 @@ function Filters({ filterText, onFilterTextChange, status, onStatusChange }: Fil
           label: country.name,
           value: country.id,
         }));
-        const countries = createListCollection({ items: data });
-        setCountriesCollection(countries);
+        const countriesCollection = createListCollection({ items: data });
+        setCountries(countriesCollection);
       }
     } catch (error) {
       console.error("Error fetching countries", error);
@@ -62,8 +60,8 @@ function Filters({ filterText, onFilterTextChange, status, onStatusChange }: Fil
           label: state.name,
           value: state.id,
         }));
-        const states = createListCollection({ items: data });
-        setStates(states);
+        const statesCollection = createListCollection({ items: data });
+        setStates(statesCollection);
       }
     } catch (error) {
       console.error("Error fetching states", error);
@@ -80,13 +78,13 @@ function Filters({ filterText, onFilterTextChange, status, onStatusChange }: Fil
         />
       </Field.Root>
 
-      <SelectRoot size="md" collection={countriesCollection}>
+      <SelectRoot size="md" collection={countries}>
         <SelectLabel>Country</SelectLabel>
         <SelectTrigger>
           <SelectValueText placeholder="Filter by country" />
         </SelectTrigger>
         <SelectContent>
-          {countriesCollection.items.map((country) => (
+          {countries.items.map((country) => (
             <SelectItem key={country.value} item={country}>
               {country.label}
             </SelectItem>
@@ -97,12 +95,14 @@ function Filters({ filterText, onFilterTextChange, status, onStatusChange }: Fil
       <SelectRoot size="md" collection={initListCollection}>
         <SelectLabel>State</SelectLabel>
         <SelectTrigger>
-          <SelectValueText placeholder="Filter by country" />
+          <SelectValueText placeholder="Filter by state" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem item={""} key={""}>
-            {""}
-          </SelectItem>
+          {states.items.map((state) => (
+            <SelectItem key={state.value} item={state}>
+              {state.label}
+            </SelectItem>
+          ))}
         </SelectContent>
       </SelectRoot>
     </HStack>

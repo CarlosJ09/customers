@@ -3,9 +3,8 @@ export interface Customer {
   name: string;
   email: string;
   phone?: string;
-  address?: string;
-  createdAt: string;
-  updatedAt: string;
+  addresses?: any[];
+  created_at?: string;
 }
 
 export interface CustomerRequest {

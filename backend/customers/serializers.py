@@ -5,7 +5,7 @@ from .models import Customer, Address, City, State, Country
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = ["name", "code"]
+        fields = "__all__"
 
 
 class StateSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class StateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = State
-        fields = ["name", "country"]
+        fields = "__all__"
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class CitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = City
-        fields = ["name", "state"]
+        fields = "__all__"
 
 
 class AddressSerializer(serializers.ModelSerializer):

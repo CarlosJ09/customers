@@ -25,6 +25,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { ColorModeButton } from "@/components/ui/color-mode";
 import logo from "@/assets/oriontek_logo.jpg";
 import { Link } from "react-router";
+import { useAuth } from "@/context/AuthContext";
 
 interface LinkItemProps {
   name: string;
@@ -92,7 +93,7 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
         role="group"
         cursor="pointer"
         _hover={{
-          bg: "cyan.400",
+          bg: "purple.400",
           color: "white",
         }}
         {...rest}
@@ -114,6 +115,8 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
+  const { logout } = useAuth();
+
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -168,7 +171,9 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
           >
             <MenuItem value="profile">Profile</MenuItem>
             <MenuSeparator />
-            <MenuItem value="sign-out">Sign out</MenuItem>
+            <MenuItem value="sign-out" onClick={logout}>
+              Sign out
+            </MenuItem>
           </MenuContent>
         </MenuRoot>
       </HStack>

@@ -20,31 +20,30 @@ type CustomerTableProps = {
 };
 
 function CustomerTable({ customers = [] }: CustomerTableProps) {
-  const [selection, setSelection] = useState<string[]>([]);
+  const [selection, setSelection] = useState<number[]>([]);
 
   const hasSelection = selection.length > 0;
   const indeterminate = hasSelection && selection.length < customers.length;
 
   const rows = customers.map((item) => (
-    <Table.Row key={item.id} data-selected={selection.includes(item.name) ? "" : undefined}>
+    <Table.Row key={item.id} data-selected={selection.includes(item.id) ? "" : undefined}>
       <Table.Cell>
         <Checkbox
           top="1"
           aria-label="Select row"
-          checked={selection.includes(item.name)}
+          checked={selection.includes(item.id)}
           onCheckedChange={(changes) => {
             setSelection((prev) =>
-              changes.checked
-                ? [...prev, item.name]
-                : selection.filter((name) => name !== item.name)
+              changes.checked ? [...prev, item.id] : selection.filter((id) => id !== item.id)
             );
           }}
         />
       </Table.Cell>
       <Table.Cell>{item.name}</Table.Cell>
       <Table.Cell>{item.email}</Table.Cell>
-      <Table.Cell>${item.phone}</Table.Cell>
-      <Table.Cell>${item.address}</Table.Cell>
+      <Table.Cell>{item.phone}</Table.Cell>
+      <Table.Cell>{item.addresses?.length}</Table.Cell>
+      <Table.Cell>{item.created_at?.slice(0, 10)}</Table.Cell>
     </Table.Row>
   ));
 
@@ -60,7 +59,7 @@ function CustomerTable({ customers = [] }: CustomerTableProps) {
                 aria-label="Select all rows"
                 checked={indeterminate ? "indeterminate" : selection.length > 0}
                 onCheckedChange={(changes) => {
-                  setSelection(changes.checked ? customers.map((item) => item.name) : []);
+                  setSelection(changes.checked ? customers.map((item) => item.id) : []);
                 }}
               />
             </Table.ColumnHeader>
@@ -69,13 +68,21 @@ function CustomerTable({ customers = [] }: CustomerTableProps) {
                 <Table.ColumnHeader fontWeight="bold">Name</Table.ColumnHeader>
                 <Table.ColumnHeader fontWeight="bold">Email</Table.ColumnHeader>
                 <Table.ColumnHeader fontWeight="bold">Phone</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold">Address</Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight="bold">Addresses</Table.ColumnHeader>
+                <Table.ColumnHeader fontWeight="bold">Date Created</Table.ColumnHeader>
               </>
             )}
           </Table.Row>
         </Table.Header>
+
         <Table.Body>
-          {!!rows.length ? rows : <Table.Cell textAlign={"center"}>No data found</Table.Cell>}
+          {!!rows.length ? (
+            rows
+          ) : (
+            <Table.Row textAlign={"center"}>
+              <Table.Cell>No data found</Table.Cell>
+            </Table.Row>
+          )}
         </Table.Body>
       </Table.Root>
 
@@ -83,11 +90,13 @@ function CustomerTable({ customers = [] }: CustomerTableProps) {
         <ActionBarContent>
           <ActionBarSelectionTrigger>{selection.length} selected</ActionBarSelectionTrigger>
           <ActionBarSeparator />
-          <Button variant="outline" size="sm">
+          {selection.length <= 1 && (
+            <Button variant="outline" size="sm">
+              Go to Detail
+            </Button>
+          )}
+          <Button colorPalette={"red"} variant="solid" size="sm">
             Delete
-          </Button>
-          <Button variant="outline" size="sm">
-            Go to Detail
           </Button>
         </ActionBarContent>
       </ActionBarRoot>

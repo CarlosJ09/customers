@@ -1,4 +1,5 @@
 import { Heading, Button, HStack } from "@chakra-ui/react";
+import { Link } from "react-router";
 
 type HeaderProps = {
   onAddCustomer: () => void;
@@ -12,7 +13,9 @@ function Header({ onAddCustomer }: HeaderProps) {
       </Heading>
 
       <HStack gap={8}>
-        <Button onClick={onAddCustomer}>Add Customer</Button>
+        <Link to={"/customers/create"}>
+          <Button onClick={onAddCustomer}>Add Customer</Button>
+        </Link>
         <Button onClick={onAddCustomer}>Generate Report</Button>
       </HStack>
     </HStack>

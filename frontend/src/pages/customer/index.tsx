@@ -1,30 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@chakra-ui/react";
 import Header from "@/components/customer/Header";
 import Filters from "@/components/customer/Filters";
 import CustomerTable from "@/components/customer/Table";
+import { customerService } from "@/services/CustomerService";
+import { Customer } from "@/types/customer";
 
 function MainPage() {
   const [filterText, setFilterText] = useState("");
   const [status, setStatus] = useState("");
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
-  const [customers, setCustomers] = useState([
-    { name: "John Doe", email: "john@example.com", status: "active" },
-    { name: "Jane Smith", email: "jane@example.com", status: "inactive" },
-  ]);
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await customerService.getAll();
+      if (response.status === 200) {
+        const data = response.data;
+        setCustomers(data);
+      }
+    } catch (error) {
+      console.error("Error fetching customers", error);
+    }
+  };
 
   const handleAddCustomer = () => {
     // Logic to add a new customer
   };
 
   const handleGenerateReport = () => {};
-
-  const filteredCustomers = customers.filter((customer) => {
-    return (
-      customer.name.toLowerCase().includes(filterText.toLowerCase()) &&
-      (status ? customer.status === status : true)
-    );
-  });
 
   return (
     <Box p={4}>
@@ -35,7 +42,7 @@ function MainPage() {
         status={status}
         onStatusChange={setStatus}
       />
-      <CustomerTable />
+      <CustomerTable customers={customers} />
     </Box>
   );
 }

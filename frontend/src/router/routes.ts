@@ -1,21 +1,25 @@
 import { lazy } from "react";
 import BaseLayout from "@/layouts/BaseLayout";
 
-const SignIn = lazy(() => import("@/pages/SignIn"));
-const SignUp = lazy(() => import("@/pages/SignUp"));
-const Home = lazy(() => import("@/pages/Home"));
+const SignInPage = lazy(() => import("@/pages/auth/sign-in"));
+const SignUpPage = lazy(() => import("@/pages/auth/sign-up"));
+const CustomerPage = lazy(() => import("@/pages/customer/index"));
+const CreateCustomerPage = lazy(() => import("@/pages/customer/create"));
 
 export const customRoutes = [
   {
     path: "/",
     layout: BaseLayout,
-    children: [{ path: "/", element: Home }],
+    children: [
+      { path: "/", element: CustomerPage },
+      { path: "/customers/create", element: CreateCustomerPage },
+    ],
   },
   {
     path: "/auth",
     children: [
-      { path: "sign-in", element: SignIn },
-      { path: "sign-up", element: SignUp },
+      { path: "sign-in", element: SignInPage },
+      { path: "sign-up", element: SignUpPage },
     ],
   },
 ];
