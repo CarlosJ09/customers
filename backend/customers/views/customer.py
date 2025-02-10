@@ -1,5 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -21,6 +22,21 @@ class BaseViewSet(viewsets.ModelViewSet):
 class CustomerViewSet(BaseViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["name", "email"]
+    search_fields = ["name", "email"]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        country_id = self.request.query_params.get("country_id")
+        state_id = self.request.query_params.get("state_id")
+
+        if country_id:
+            queryset = queryset.filter(addresses__city__state__country_id=country_id)
+        if state_id:
+            queryset = queryset.filter(addresses__city__state_id=state_id)
+
+        return queryset
 
 
 class CountryViewSet(BaseViewSet):

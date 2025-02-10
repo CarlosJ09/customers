@@ -11,74 +11,53 @@ import { Toaster, toaster } from "@/components/ui/toaster";
 function MainPage() {
   const initialPagination = { page: 1, count: 0 };
   const [filterText, setFilterText] = useState("");
-  const [status, setStatus] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<number | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [pagination, setPagination] = useState(initialPagination);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCustomers(pagination.page);
-  }, [pagination.page]);
+  }, [pagination.page, filterText, selectedCountry]);
 
   const fetchCustomers = async (page: number) => {
     try {
-      const response = await customerService.getAll(page);
+      const response = await customerService.getAll(page, filterText, selectedCountry);
       if (response.status === 200) {
         const data = response.data;
         setCustomers(data.results);
-        setPagination((prev) => {
-          return {
-            ...prev,
-            count: data.count,
-          };
-        });
+        setPagination((prev) => ({ ...prev, count: data.count }));
       }
     } catch (error) {
       console.error("Error fetching customers", error);
     }
   };
 
-  const handleAddCustomer = async () => {
-    navigate("/customers/create");
-  };
-
-  const handleGenerateReport = () => {};
-
-  const deleteCustomer = async (id: number) => {
-    try {
-      const response = await customerService.delete(id);
-      if (response.status === 204) {
-        toaster.create({ title: "Customer deleted successfully!" });
-        fetchCustomers(initialPagination.page);
-      }
-    } catch (error) {
-      toaster.error({ title: "Error deleting customer." });
-    }
-  };
-
-  const handlePaginationChange = (page: number) => {
-    setPagination((prev) => ({
-      ...prev,
-      page,
-    }));
-  };
-
   return (
     <Box p={4}>
       <Toaster />
-
-      <Header onAddCustomer={handleAddCustomer} onGenerateReport={handleGenerateReport} />
+      <Header onAddCustomer={() => navigate("/customers/create")} onGenerateReport={() => {}} />
       <Filters
         filterText={filterText}
         onFilterTextChange={setFilterText}
-        status={status}
-        onStatusChange={setStatus}
+        selectedCountry={selectedCountry}
+        onCountryChange={setSelectedCountry}
       />
       <CustomerTable
         customers={customers}
         pagination={pagination}
-        onPaginationChange={handlePaginationChange}
-        onDeleteCustomer={deleteCustomer}
+        onPaginationChange={(page) => setPagination((prev) => ({ ...prev, page }))}
+        onDeleteCustomer={async (id) => {
+          try {
+            const response = await customerService.delete(id);
+            if (response.status === 204) {
+              toaster.create({ title: "Customer deleted successfully!" });
+              fetchCustomers(initialPagination.page);
+            }
+          } catch {
+            toaster.error({ title: "Error deleting customer." });
+          }
+        }}
       />
     </Box>
   );

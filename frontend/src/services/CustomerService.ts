@@ -3,9 +3,14 @@ import { ResponseWithPagination } from "@/types/api";
 import { CustomerResponse, CustomerRequest } from "@/types/customer";
 
 export const customerService = {
-  getAll: async (page: number) => {
+  getAll: async (page: number, search?: string, countryId?: number) => {
+    const params = new URLSearchParams({ page: page.toString() });
+
+    if (search) params.append("search", search);
+    if (countryId) params.append("country_id", countryId.toString());
+
     const response = await api.get<ResponseWithPagination<CustomerResponse>>(
-      `/customers?page=${page}`
+      `/customers?${params.toString()}`
     );
     return response;
   },
