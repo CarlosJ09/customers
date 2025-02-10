@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 
 function DashboardPage() {
   const [totalCustomers, setTotalCustomers] = useState(0);
+  const [countriesCount, setCountriesCount] = useState(0);
   const [customersByCountry, setCustomersByCountry] = useState<
     { country: string; count: number }[]
   >([]);
@@ -18,6 +19,7 @@ function DashboardPage() {
       const response = await customerService.getDashboardStats();
       if (response.status === 200) {
         setTotalCustomers(response.data.totalCustomers);
+        setCountriesCount(response.data.customersByCountry.length);
         setCustomersByCountry(response.data.customersByCountry);
       }
     } catch (error) {
@@ -33,9 +35,10 @@ function DashboardPage() {
 
       <SimpleGrid columns={[1, 2, 3]} gap={6}>
         <StatBox label="Total Customers" value={totalCustomers} />
+        <StatBox label="From Different Countries" value={countriesCount} />
       </SimpleGrid>
 
-      <Box mt={6} p={4} bg="white" boxShadow="md" borderRadius="md">
+      <Box mt={8} p={4} boxShadow="md" borderRadius="md">
         <Heading size="md" mb={4}>
           Customers by Country
         </Heading>
@@ -44,7 +47,7 @@ function DashboardPage() {
             <XAxis dataKey="country" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="count" fill="#3182ce" />
+            <Bar dataKey="count" fill="#9333ea" />
           </BarChart>
         </ResponsiveContainer>
       </Box>
@@ -53,7 +56,7 @@ function DashboardPage() {
 }
 
 const StatBox = ({ label, value }: { label: string; value: number }) => (
-  <Box p={4} bg="white" boxShadow="md" borderRadius="md">
+  <Box p={4} boxShadow="md" borderRadius="md">
     <Stat.Root>
       <StatLabel>{label}</StatLabel>
       <StatValueText>{value}</StatValueText>

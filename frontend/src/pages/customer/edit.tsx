@@ -9,7 +9,6 @@ import { customerService } from "@/services/CustomerService";
 
 const UpdateCustomerPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<{
     name: string;
@@ -25,6 +24,7 @@ const UpdateCustomerPage = () => {
     }>;
   } | null>(null);
   const [fetchLoading, setFetchLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCustomer();
@@ -39,7 +39,7 @@ const UpdateCustomerPage = () => {
       setInitialData({
         name: customerData.name,
         email: customerData.email,
-        phone: customerData.phone,
+        phone: customerData.phone || "",
         addresses: customerData.addresses.map((address, index) => ({
           id: index + 1,
           countryId: address.city.state.country.id,
@@ -51,7 +51,7 @@ const UpdateCustomerPage = () => {
       });
     } catch (error) {
       toaster.error({ title: "Error fetching customer data." });
-      navigate("/");
+      navigate("/customers");
     } finally {
       setFetchLoading(false);
     }
@@ -78,7 +78,7 @@ const UpdateCustomerPage = () => {
 
       if (response.status === 200) {
         toaster.create({ title: "Customer updated successfully!" });
-        navigate("/");
+        navigate("/customers");
       } else if (response.status === 400) {
         if (response.data.email) {
           toaster.error({ title: response.data.email[0] });
@@ -107,7 +107,7 @@ const UpdateCustomerPage = () => {
       <Fallback isLoading={loading} />
 
       <HStack mb={6}>
-        <Link to="/">
+        <Link to="/customers">
           <IconButton size="xs" mr={2}>
             <FiArrowLeft />
           </IconButton>

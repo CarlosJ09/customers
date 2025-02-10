@@ -59,8 +59,13 @@ const SignIn = () => {
         <VStack spaceY={4}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Email</Field.Label>
-              <Input name="username" placeholder="username" onChange={handleChange} />
+              <Field.Label>Username</Field.Label>
+              <Input
+                name="username"
+                placeholder="Enter username"
+                onChange={handleChange}
+                required
+              />
             </Field.Root>
 
             <Field.Root mt={4}>
@@ -68,7 +73,7 @@ const SignIn = () => {
               <Input
                 name="password"
                 type="password"
-                placeholder="********"
+                placeholder="Enter password"
                 onChange={handleChange}
               />
             </Field.Root>

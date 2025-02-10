@@ -30,7 +30,7 @@ const CreateCustomerPage = () => {
 
       if (response.status === 201) {
         toaster.success({ title: "Customer created successfully!" });
-        navigate("/");
+        navigate("/customers");
       } else if (response.status === 400) {
         if (response.data.email) {
           toaster.error({ title: response.data.email[0] });
@@ -51,7 +51,7 @@ const CreateCustomerPage = () => {
       <Fallback isLoading={loading} />
 
       <HStack mb={6}>
-        <Link to="/">
+        <Link to="/customers">
           <IconButton size="xs" mr={2}>
             <FiArrowLeft />
           </IconButton>

@@ -106,7 +106,7 @@ class AddressViewSet(BaseViewSet):
 def dashboard_stats(request):
     customers_by_country = Customer.objects.values(
         country=F("addresses__city__state__country__name")
-    ).annotate(count=Count("id"))
+    ).annotate(count=Count("id", distinct=True))
 
     response_data = {
         "totalCustomers": Customer.objects.count(),

@@ -13,12 +13,14 @@ import {
   ActionBarSeparator,
 } from "@/components/ui/action-bar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Customer } from "@/types/customer";
 import { Link } from "react-router";
 
 type CustomerTableProps = {
   customers: Customer[];
   pagination: { page: number; count: number };
+  isLoading?: boolean;
   onPaginationChange?: (page: number) => void;
   onDeleteCustomer: (id: number) => void;
   onBulkDeleteCustomers: (selectedCustomers: number[]) => void;
@@ -27,6 +29,7 @@ type CustomerTableProps = {
 function CustomerTable({
   customers = [],
   pagination,
+  isLoading = false,
   onPaginationChange,
   onDeleteCustomer,
   onBulkDeleteCustomers,
@@ -61,41 +64,45 @@ function CustomerTable({
   return (
     <Stack width="full" gap="5">
       <Heading size="xl">Customers</Heading>
-      <Table.Root striped={true}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader w="6">
-              <Checkbox
-                top="1"
-                aria-label="Select all rows"
-                checked={indeterminate ? "indeterminate" : selection.length > 0}
-                onCheckedChange={(changes) => {
-                  setSelection(changes.checked ? customers.map((item) => item.id) : []);
-                }}
-              />
-            </Table.ColumnHeader>
-            {!!rows.length && (
-              <>
-                <Table.ColumnHeader fontWeight="bold">Name</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold">Email</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold">Phone</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold">Addresses</Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold">Date Created</Table.ColumnHeader>
-              </>
-            )}
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body>
-          {!!rows.length ? (
-            rows
-          ) : (
-            <Table.Row textAlign={"center"}>
-              <Table.Cell>No data found</Table.Cell>
+      {isLoading ? (
+        <Skeleton height={300} />
+      ) : (
+        <Table.Root striped={true}>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader w="6">
+                <Checkbox
+                  top="1"
+                  aria-label="Select all rows"
+                  checked={indeterminate ? "indeterminate" : selection.length > 0}
+                  onCheckedChange={(changes) => {
+                    setSelection(changes.checked ? customers.map((item) => item.id) : []);
+                  }}
+                />
+              </Table.ColumnHeader>
+              {!!rows.length && (
+                <>
+                  <Table.ColumnHeader fontWeight="bold">Name</Table.ColumnHeader>
+                  <Table.ColumnHeader fontWeight="bold">Email</Table.ColumnHeader>
+                  <Table.ColumnHeader fontWeight="bold">Phone</Table.ColumnHeader>
+                  <Table.ColumnHeader fontWeight="bold">Addresses</Table.ColumnHeader>
+                  <Table.ColumnHeader fontWeight="bold">Date Created</Table.ColumnHeader>
+                </>
+              )}
             </Table.Row>
-          )}
-        </Table.Body>
-      </Table.Root>
+          </Table.Header>
+
+          <Table.Body>
+            {!!rows.length ? (
+              rows
+            ) : (
+              <Table.Row textAlign={"center"}>
+                <Table.Cell>No data found</Table.Cell>
+              </Table.Row>
+            )}
+          </Table.Body>
+        </Table.Root>
+      )}
 
       <ActionBarRoot open={hasSelection}>
         <ActionBarContent>

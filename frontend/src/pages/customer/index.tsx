@@ -4,6 +4,7 @@ import { Box } from "@chakra-ui/react";
 import Header from "@/components/customer/Header";
 import Filters from "@/components/customer/Filters";
 import CustomerTable from "@/components/customer/Table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { customerService } from "@/services/CustomerService";
 import { Customer } from "@/types/customer";
@@ -14,6 +15,7 @@ function CustomerPage() {
   const [selectedCountry, setSelectedCountry] = useState<number | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [pagination, setPagination] = useState(initialPagination);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,6 +23,7 @@ function CustomerPage() {
   }, [pagination.page, filterText, selectedCountry]);
 
   const fetchCustomers = async (page: number) => {
+    setIsLoading(true);
     try {
       const response = await customerService.getAll(page, filterText, selectedCountry ?? undefined);
       if (response.status === 200) {
@@ -30,6 +33,8 @@ function CustomerPage() {
       }
     } catch (error) {
       console.error("Error fetching customers", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,8 +74,10 @@ function CustomerPage() {
         selectedCountry={selectedCountry}
         onCountryChange={setSelectedCountry}
       />
+
       <CustomerTable
         customers={customers}
+        isLoading={isLoading}
         pagination={pagination}
         onPaginationChange={(page) => setPagination((prev) => ({ ...prev, page }))}
         onDeleteCustomer={(id) => handleDeleteCustomers(id)}

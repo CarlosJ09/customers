@@ -62,7 +62,9 @@ class CustomerSerializer(serializers.ModelSerializer):
 
         for address_data in addresses_data:
             city_instance = address_data.pop("city")  # Extract city instance
-            Address.objects.create(customer=customer, city=city_instance, **address_data)
+            Address.objects.create(
+                customer=customer, city=city_instance, **address_data
+            )
 
         return customer
 
@@ -76,6 +78,8 @@ class CustomerSerializer(serializers.ModelSerializer):
         instance.addresses.all().delete()
         for address_data in addresses_data:
             city_instance = address_data.pop("city")
-            Address.objects.create(customer=instance, city=city_instance, **address_data)
+            Address.objects.create(
+                customer=instance, city=city_instance, **address_data
+            )
 
         return instance

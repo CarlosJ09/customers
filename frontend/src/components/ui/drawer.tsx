@@ -47,8 +47,8 @@ interface SidebarProps extends BoxProps {
 }
 
 const LinkItems: Array<LinkItemProps> = [
-  { name: "Dashboard", icon: FiBarChart, link: "/dashboard" },
-  { name: "Customers", icon: FiUser, link: "/" },
+  { name: "Dashboard", icon: FiBarChart, link: "/" },
+  { name: "Customers", icon: FiUser, link: "/customers" },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {

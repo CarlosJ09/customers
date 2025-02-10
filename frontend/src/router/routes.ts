@@ -20,10 +20,10 @@ export const customRoutes = [
     path: "/",
     layout: BaseLayout,
     children: [
-      { path: "/", element: CustomerPage },
+      { path: "/", element: DashboardPage },
+      { path: "/customers", element: CustomerPage },
       { path: "/customers/create", element: CreateCustomerPage },
       { path: "/customers/:id", element: UpdateCustomerPage },
-      { path: "/dashboard", element: DashboardPage },
     ],
   },
 ];
