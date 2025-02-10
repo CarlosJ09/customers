@@ -24,7 +24,7 @@ class BaseViewSet(viewsets.ModelViewSet):
 
 
 class CustomerViewSet(BaseViewSet):
-    queryset = Customer.objects.all()
+    queryset = Customer.objects.all().order_by("-created_at")
     serializer_class = CustomerSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["name", "email"]

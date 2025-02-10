@@ -1,4 +1,4 @@
-import { Heading, Button, HStack } from "@chakra-ui/react";
+import { Heading, Button, HStack, Stack } from "@chakra-ui/react";
 
 type HeaderProps = {
   onAddCustomer: () => void;
@@ -7,17 +7,25 @@ type HeaderProps = {
 
 function Header({ onAddCustomer, onGenerateReport }: HeaderProps) {
   return (
-    <HStack justifyContent="space-between" mb={8}>
-      <Heading as="h1" size="xl">
+    <Stack
+      direction={["column", "row"]}
+      justifyContent="space-between"
+      alignItems={["center", "center"]}
+      mb={8}
+      gap={[4, 8]}
+    >
+      <Heading as="h1" size={["lg", "xl"]} textAlign={["center", "left"]}>
         Customers Management
       </Heading>
-
-      <HStack gap={8}>
-        <Button onClick={onAddCustomer}>Add Customer</Button>
-
-        <Button onClick={onGenerateReport}>Generate Report</Button>
-      </HStack>
-    </HStack>
+      <Stack direction={["column", "row"]} gap={[4, 8]} width={["100%", "auto"]}>
+        <Button onClick={onAddCustomer} width={["100%", "auto"]}>
+          Add Customer
+        </Button>
+        <Button onClick={onGenerateReport} width={["100%", "auto"]}>
+          Generate Report
+        </Button>
+      </Stack>
+    </Stack>
   );
 }
 
