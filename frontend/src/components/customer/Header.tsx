@@ -9,7 +9,7 @@ function Header({ onAddCustomer, onGenerateReport }: HeaderProps) {
   return (
     <HStack justifyContent="space-between" mb={8}>
       <Heading as="h1" size="xl">
-        Customer Management
+        Customers Management
       </Heading>
 
       <HStack gap={8}>

@@ -18,10 +18,17 @@ import { Link } from "react-router";
 
 type CustomerTableProps = {
   customers: Customer[];
+  pagination: { page: number; count: number };
+  onPaginationChange?: (page: number) => void;
   onDeleteCustomer: (id: number) => void;
 };
 
-function CustomerTable({ customers = [], onDeleteCustomer }: CustomerTableProps) {
+function CustomerTable({
+  customers = [],
+  pagination,
+  onPaginationChange,
+  onDeleteCustomer,
+}: CustomerTableProps) {
   const [selection, setSelection] = useState<number[]>([]);
 
   const hasSelection = selection.length > 0;
@@ -113,7 +120,12 @@ function CustomerTable({ customers = [], onDeleteCustomer }: CustomerTableProps)
         </ActionBarContent>
       </ActionBarRoot>
 
-      <PaginationRoot count={customers.length * 5} pageSize={5} page={1}>
+      <PaginationRoot
+        count={pagination.count}
+        pageSize={5}
+        page={pagination.page}
+        onPageChange={(value) => onPaginationChange?.(value.page)}
+      >
         <HStack wrap="wrap">
           <PaginationPrevTrigger />
           <PaginationItems />

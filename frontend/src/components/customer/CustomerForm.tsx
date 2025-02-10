@@ -100,7 +100,7 @@ export const CustomerForm = ({
   const fetchCountries = async () => {
     const response = await addressService.getCountries();
     if (response.status === 200) {
-      const data = response.data.map((country) => ({
+      const data = response.data.results.map((country) => ({
         label: country.name,
         value: country.id.toString(),
       }));

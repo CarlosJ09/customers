@@ -1,9 +1,12 @@
 import { api } from "@/interceptor/axios";
-import { Customer, CustomerResponse, CustomerRequest } from "@/types/customer";
+import { ResponseWithPagination } from "@/types/api";
+import { CustomerResponse, CustomerRequest } from "@/types/customer";
 
 export const customerService = {
-  getAll: async () => {
-    const response = await api.get<CustomerResponse[]>("/customers/");
+  getAll: async (page: number) => {
+    const response = await api.get<ResponseWithPagination<CustomerResponse>>(
+      `/customers?page=${page}`
+    );
     return response;
   },
 
@@ -13,12 +16,12 @@ export const customerService = {
   },
 
   create: async (customerData: CustomerRequest) => {
-    const response = await api.post<Customer>("/customers/", customerData);
+    const response = await api.post<CustomerResponse>("/customers/", customerData);
     return response;
   },
 
   update: async (id: number, customerData: CustomerRequest) => {
-    const response = await api.put<Customer>(`/customers/${id}/`, customerData);
+    const response = await api.put<CustomerResponse>(`/customers/${id}/`, customerData);
     return response;
   },
 

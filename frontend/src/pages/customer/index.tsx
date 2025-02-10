@@ -9,21 +9,29 @@ import { useNavigate } from "react-router";
 import { Toaster, toaster } from "@/components/ui/toaster";
 
 function MainPage() {
+  const initialPagination = { page: 1, count: 0 };
   const [filterText, setFilterText] = useState("");
   const [status, setStatus] = useState("");
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [pagination, setPagination] = useState(initialPagination);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    fetchCustomers(pagination.page);
+  }, [pagination.page]);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (page: number) => {
     try {
-      const response = await customerService.getAll();
+      const response = await customerService.getAll(page);
       if (response.status === 200) {
         const data = response.data;
-        setCustomers(data);
+        setCustomers(data.results);
+        setPagination((prev) => {
+          return {
+            ...prev,
+            count: data.count,
+          };
+        });
       }
     } catch (error) {
       console.error("Error fetching customers", error);
@@ -41,11 +49,18 @@ function MainPage() {
       const response = await customerService.delete(id);
       if (response.status === 204) {
         toaster.create({ title: "Customer deleted successfully!" });
-        fetchCustomers();
+        fetchCustomers(initialPagination.page);
       }
     } catch (error) {
       toaster.error({ title: "Error deleting customer." });
     }
+  };
+
+  const handlePaginationChange = (page: number) => {
+    setPagination((prev) => ({
+      ...prev,
+      page,
+    }));
   };
 
   return (
@@ -59,7 +74,12 @@ function MainPage() {
         status={status}
         onStatusChange={setStatus}
       />
-      <CustomerTable customers={customers} onDeleteCustomer={deleteCustomer} />
+      <CustomerTable
+        customers={customers}
+        pagination={pagination}
+        onPaginationChange={handlePaginationChange}
+        onDeleteCustomer={deleteCustomer}
+      />
     </Box>
   );
 }

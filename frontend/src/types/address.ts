@@ -6,6 +6,7 @@ export interface AddressForm {
   street: string;
   postalCode: string;
 }
+
 export interface Country {
   id: number;
   name: string;

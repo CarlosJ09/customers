@@ -6,11 +6,13 @@ export interface Customer {
   addresses?: any[];
   created_at?: string;
 }
+
 export interface CustomerResponse {
   id: number;
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
+  created_at: string;
   addresses: Array<{
     id: number;
     city: {

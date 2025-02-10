@@ -1,9 +1,10 @@
 import { api } from "@/interceptor/axios";
 import { Country, State, City } from "@/types/address";
+import { ResponseWithPagination } from "@/types/api";
 
 export const addressService = {
   getCountries: async () => {
-    const response = await api.get<Country[]>("/countries/");
+    const response = await api.get<ResponseWithPagination<Country>>("/countries/");
     return response;
   },
 
