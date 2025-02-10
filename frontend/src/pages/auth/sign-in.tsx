@@ -29,7 +29,7 @@ const SignIn = () => {
       const data = response.data;
 
       if (response.status === 200) {
-        login(data.access, data.refresh);
+        login(data.user, data.access, data.refresh);
       }
     } catch (error: any) {
       if (error.response.status === 401) {

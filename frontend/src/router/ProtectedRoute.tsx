@@ -9,6 +9,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!loading && !user) {
+      console.log(user);
       navigate("/auth/sign-in", { replace: true });
     }
   }, [loading, user]);

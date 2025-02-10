@@ -71,7 +71,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </Text>
       </Flex>
       {LinkItems.map((link) => (
-        <Link key={link.name} to={link.link}>
+        <Link key={link.name} to={link.link} onClick={onClose}>
           <NavItem key={link.name} icon={link.icon}>
             {link.name}
           </NavItem>
@@ -114,7 +114,7 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <Flex
@@ -146,7 +146,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         Oriontek
       </Text>
 
-      <HStack /* spacing={{ base: "0", md: "6" }} */>
+      <HStack>
         <ColorModeButton />
 
         <MenuRoot>
@@ -154,9 +154,11 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
             <HStack>
               <Avatar size={"sm"} />
               <VStack display={{ base: "none", md: "flex" }} alignItems="flex-start" ml="2">
-                <Text fontSize="sm">Justina Clark</Text>
+                <Text fontSize="sm">
+                  {user?.first_name} {user?.last_name}
+                </Text>
                 <Text fontSize="xs" color="gray.600">
-                  Admin
+                  {user?.username}
                 </Text>
               </VStack>
               <Box display={{ base: "none", md: "flex" }} ml={4}>
@@ -168,8 +170,6 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
             bg={useColorModeValue("white", "gray.900")}
             borderColor={useColorModeValue("gray.200", "gray.700")}
           >
-            <MenuItem value="profile">Profile</MenuItem>
-            <MenuSeparator />
             <MenuItem value="sign-out" onClick={logout}>
               Sign out
             </MenuItem>

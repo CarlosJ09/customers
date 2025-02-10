@@ -1,6 +1,6 @@
 import axios from "axios";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/token";
-import { getToken, setToken, removeToken } from "@/utils/auth";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY } from "@/constants/token";
+import { getLocalStorageItem, setLocalStorageItem, removeLocalStorageItem } from "@/utils/auth";
 
 export const api = axios.create({
   baseURL: `${import.meta.env.VITE_BACKENDHOST}/api`,
@@ -20,7 +20,7 @@ const addRefreshSubscriber = (callback: (token: string) => void) => {
 
 api.interceptors.request.use(
   (config) => {
-    const token = getToken(ACCESS_TOKEN_KEY);
+    const token = getLocalStorageItem(ACCESS_TOKEN_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,11 +37,12 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshToken = getToken(REFRESH_TOKEN_KEY);
+      const refreshToken = getLocalStorageItem(REFRESH_TOKEN_KEY);
       if (!refreshToken) {
         console.warn("No refresh token found. Logging out.");
-        removeToken(ACCESS_TOKEN_KEY);
-        removeToken(REFRESH_TOKEN_KEY);
+        removeLocalStorageItem(ACCESS_TOKEN_KEY);
+        removeLocalStorageItem(REFRESH_TOKEN_KEY);
+        removeLocalStorageItem(USER_KEY);
         window.location.href = "/auth/sign-in";
         return error.response;
       }
@@ -58,15 +59,16 @@ api.interceptors.response.use(
           );
 
           const newAccessToken = response.data.access;
-          setToken(ACCESS_TOKEN_KEY, newAccessToken);
+          setLocalStorageItem(ACCESS_TOKEN_KEY, newAccessToken);
           onTokenRefreshed(newAccessToken);
           isRefreshing = false;
 
           return api(originalRequest);
         } catch (refreshError) {
           console.error("Token refresh failed. Logging out.");
-          removeToken(ACCESS_TOKEN_KEY);
-          removeToken(REFRESH_TOKEN_KEY);
+          removeLocalStorageItem(ACCESS_TOKEN_KEY);
+          removeLocalStorageItem(REFRESH_TOKEN_KEY);
+          removeLocalStorageItem(USER_KEY);
           window.location.href = "/auth/sign-in";
           return Promise.reject(refreshError);
         }

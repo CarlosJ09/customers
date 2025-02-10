@@ -4,7 +4,6 @@ import { Box } from "@chakra-ui/react";
 import Header from "@/components/customer/Header";
 import Filters from "@/components/customer/Filters";
 import CustomerTable from "@/components/customer/Table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { customerService } from "@/services/CustomerService";
 import { Customer } from "@/types/customer";
@@ -64,10 +63,45 @@ function CustomerPage() {
     }
   };
 
+  const handleGenerateReport = async () => {
+    try {
+      setIsLoading(true);
+      const response = await customerService.getCustomerReport();
+
+      if (response.status === 200) {
+        const blob = new Blob([response.data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const filename = response.headers["content-disposition"]
+          ? response.headers["content-disposition"].split("filename=")[1].replace(/"/g, "")
+          : "customer_report.xlsx";
+
+        link.href = url;
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        toaster.success({ title: "Report generated successfully!" });
+      }
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toaster.error({ title: "Error generating report." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box p={4}>
       <Toaster />
-      <Header onAddCustomer={() => navigate("/customers/create")} onGenerateReport={() => {}} />
+      <Header
+        onAddCustomer={() => navigate("/customers/create")}
+        onGenerateReport={handleGenerateReport}
+      />
       <Filters
         filterText={filterText}
         onFilterTextChange={setFilterText}

@@ -46,4 +46,11 @@ export const customerService = {
     const response = await api.get<DashboardStats>("/dashboard/");
     return response;
   },
+
+  getCustomerReport: async () => {
+    const response = await api.get<File>("/customers/generate_report/", {
+      responseType: "arraybuffer",
+    });
+    return response;
+  },
 };
