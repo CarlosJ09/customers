@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "@/components/ui/menu";
 import { useColorModeValue } from "@/components/ui/color-mode";
-import { FiUser, FiBarChart, FiPaperclip, FiMenu, FiChevronDown } from "react-icons/fi";
+import { FiUser, FiBarChart, FiMenu, FiChevronDown } from "react-icons/fi";
 import { IconType } from "react-icons";
 import { Avatar } from "@/components/ui/avatar";
 import { ColorModeButton } from "@/components/ui/color-mode";
@@ -49,7 +49,6 @@ interface SidebarProps extends BoxProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: "Dashboard", icon: FiBarChart, link: "/dashboard" },
   { name: "Customers", icon: FiUser, link: "/" },
-  { name: "Reports", icon: FiPaperclip, link: "/reports" },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {

@@ -39,3 +39,8 @@ export interface CustomerRequest {
   phone?: string;
   address?: string;
 }
+
+export interface DashboardStats {
+  totalCustomers: number;
+  customersByCountry: { country: string; count: number }[];
+}

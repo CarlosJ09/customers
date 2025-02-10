@@ -6,6 +6,7 @@ from .views.customer import (
     StateViewSet,
     CityViewSet,
     AddressViewSet,
+    dashboard_stats,
 )
 from .views.auth import (
     RegisterUserView,
@@ -26,5 +27,6 @@ urlpatterns = [
     path("auth/login/", LoginUserView.as_view(), name="login"),
     path("auth/refresh/", RefreshTokenView.as_view(), name="token_refresh"),
     path("auth/logout/", LogoutUserView.as_view(), name="logout"),
+    path("dashboard/", dashboard_stats, name="dashboard_stats"),
     path("", include(router.urls)),
 ]

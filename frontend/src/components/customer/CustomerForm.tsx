@@ -197,11 +197,11 @@ export const CustomerForm = ({
         <Box>
           <Field.Root required>
             <Field.Label>
-              Name <Text color={"red"}>*</Text>
+              Full Name <Text color={"red"}>*</Text>
             </Field.Label>
             <Input
               value={formData.name}
-              placeholder="Enter name"
+              placeholder="Enter full name"
               w="full"
               onChange={(e) => updateFormField("name", e.target.value)}
             />
@@ -215,7 +215,7 @@ export const CustomerForm = ({
             </Field.Label>
             <Input
               value={formData.email}
-              placeholder="Enter email"
+              placeholder="customer@email.com"
               w="full"
               onChange={(e) => updateFormField("email", e.target.value)}
             />
@@ -229,7 +229,7 @@ export const CustomerForm = ({
             <Field.Label>Phone</Field.Label>
             <Input
               value={formData.phone}
-              placeholder="Enter phone"
+              placeholder="e.g: +1 8294567890"
               w="full"
               onChange={(e) => updateFormField("phone", e.target.value)}
             />

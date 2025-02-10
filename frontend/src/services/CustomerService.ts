@@ -1,6 +1,6 @@
 import { api } from "@/interceptor/axios";
 import { ResponseWithPagination } from "@/types/api";
-import { CustomerResponse, CustomerRequest } from "@/types/customer";
+import { CustomerResponse, CustomerRequest, DashboardStats } from "@/types/customer";
 
 export const customerService = {
   getAll: async (page: number, search?: string, countryId?: number) => {
@@ -32,6 +32,18 @@ export const customerService = {
 
   delete: async (id: number) => {
     const response = await api.delete(`/customers/${id}/`);
+    return response;
+  },
+
+  bulkDelete: async (customerIds: number[]) => {
+    const response = await api.post<{ error?: string }>("/customers/bulk_delete/", {
+      customer_ids: customerIds,
+    });
+    return response;
+  },
+
+  getDashboardStats: async () => {
+    const response = await api.get<DashboardStats>("/dashboard/");
     return response;
   },
 };

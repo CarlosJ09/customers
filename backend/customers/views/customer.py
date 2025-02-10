@@ -1,7 +1,8 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
+from django.db.models import Count, F
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from ..models import Customer, Country, State, City, Address
@@ -37,6 +38,26 @@ class CustomerViewSet(BaseViewSet):
             queryset = queryset.filter(addresses__city__state_id=state_id)
 
         return queryset
+
+    @action(detail=False, methods=["post"])
+    def bulk_delete(self, request):
+        customer_ids = request.data.get("customer_ids", [])
+
+        if not customer_ids:
+            return Response(
+                {"error": "No customer IDs provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        deleted_count, _ = Customer.objects.filter(id__in=customer_ids).delete()
+
+        if deleted_count > 0:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                {"error": "No customers found with the provided IDs."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class CountryViewSet(BaseViewSet):
@@ -79,3 +100,17 @@ class CityViewSet(BaseViewSet):
 class AddressViewSet(BaseViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
+
+
+@api_view(["GET"])
+def dashboard_stats(request):
+    customers_by_country = Customer.objects.values(
+        country=F("addresses__city__state__country__name")
+    ).annotate(count=Count("id"))
+
+    response_data = {
+        "totalCustomers": Customer.objects.count(),
+        "customersByCountry": list(customers_by_country),
+    }
+
+    return Response(response_data)

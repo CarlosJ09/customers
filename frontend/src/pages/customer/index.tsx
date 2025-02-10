@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { Box } from "@chakra-ui/react";
 import Header from "@/components/customer/Header";
 import Filters from "@/components/customer/Filters";
 import CustomerTable from "@/components/customer/Table";
+import { Toaster, toaster } from "@/components/ui/toaster";
 import { customerService } from "@/services/CustomerService";
 import { Customer } from "@/types/customer";
-import { useNavigate } from "react-router";
-import { Toaster, toaster } from "@/components/ui/toaster";
 
-function MainPage() {
+function CustomerPage() {
   const initialPagination = { page: 1, count: 0 };
   const [filterText, setFilterText] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<number | null>(null);
@@ -22,7 +22,7 @@ function MainPage() {
 
   const fetchCustomers = async (page: number) => {
     try {
-      const response = await customerService.getAll(page, filterText, selectedCountry);
+      const response = await customerService.getAll(page, filterText, selectedCountry ?? undefined);
       if (response.status === 200) {
         const data = response.data;
         setCustomers(data.results);
@@ -30,6 +30,32 @@ function MainPage() {
       }
     } catch (error) {
       console.error("Error fetching customers", error);
+    }
+  };
+
+  const handleDeleteCustomers = async (id: number) => {
+    try {
+      const response = await customerService.delete(id);
+      if (response.status === 204) {
+        toaster.create({ title: "Customer deleted successfully!" });
+        fetchCustomers(initialPagination.page);
+      }
+    } catch {
+      toaster.error({ title: "Error deleting customer." });
+    }
+  };
+
+  const handleBulkDeleteCustomers = async (selectedCustomers: number[]) => {
+    try {
+      const response = await customerService.bulkDelete(selectedCustomers);
+      if (response.status === 204) {
+        toaster.create({ title: "Customers deleted successfully!" });
+        fetchCustomers(initialPagination.page);
+      } else if (response.status === 404) {
+        toaster.error({ title: response.data.error });
+      }
+    } catch {
+      toaster.error({ title: "Error deleting customers." });
     }
   };
 
@@ -47,20 +73,11 @@ function MainPage() {
         customers={customers}
         pagination={pagination}
         onPaginationChange={(page) => setPagination((prev) => ({ ...prev, page }))}
-        onDeleteCustomer={async (id) => {
-          try {
-            const response = await customerService.delete(id);
-            if (response.status === 204) {
-              toaster.create({ title: "Customer deleted successfully!" });
-              fetchCustomers(initialPagination.page);
-            }
-          } catch {
-            toaster.error({ title: "Error deleting customer." });
-          }
-        }}
+        onDeleteCustomer={(id) => handleDeleteCustomers(id)}
+        onBulkDeleteCustomers={(selectedCustomers) => handleBulkDeleteCustomers(selectedCustomers)}
       />
     </Box>
   );
 }
 
-export default MainPage;
+export default CustomerPage;

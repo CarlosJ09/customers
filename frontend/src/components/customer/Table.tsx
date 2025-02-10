@@ -21,6 +21,7 @@ type CustomerTableProps = {
   pagination: { page: number; count: number };
   onPaginationChange?: (page: number) => void;
   onDeleteCustomer: (id: number) => void;
+  onBulkDeleteCustomers: (selectedCustomers: number[]) => void;
 };
 
 function CustomerTable({
@@ -28,6 +29,7 @@ function CustomerTable({
   pagination,
   onPaginationChange,
   onDeleteCustomer,
+  onBulkDeleteCustomers,
 }: CustomerTableProps) {
   const [selection, setSelection] = useState<number[]>([]);
 
@@ -108,7 +110,11 @@ function CustomerTable({
           )}
           <Button
             onClick={() => {
-              onDeleteCustomer(selection[0]);
+              if (selection.length > 1) {
+                onBulkDeleteCustomers(selection);
+              } else if (selection.length === 1) {
+                onDeleteCustomer(selection[0]);
+              }
               setSelection([]);
             }}
             colorPalette={"red"}
