@@ -5,11 +5,14 @@ import Filters from "@/components/customer/Filters";
 import CustomerTable from "@/components/customer/Table";
 import { customerService } from "@/services/CustomerService";
 import { Customer } from "@/types/customer";
+import { useNavigate } from "react-router";
+import { Toaster, toaster } from "@/components/ui/toaster";
 
 function MainPage() {
   const [filterText, setFilterText] = useState("");
   const [status, setStatus] = useState("");
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCustomers();
@@ -27,22 +30,36 @@ function MainPage() {
     }
   };
 
-  const handleAddCustomer = () => {
-    // Logic to add a new customer
+  const handleAddCustomer = async () => {
+    navigate("/customers/create");
   };
 
   const handleGenerateReport = () => {};
 
+  const deleteCustomer = async (id: number) => {
+    try {
+      const response = await customerService.delete(id);
+      if (response.status === 204) {
+        toaster.create({ title: "Customer deleted successfully!" });
+        fetchCustomers();
+      }
+    } catch (error) {
+      toaster.error({ title: "Error deleting customer." });
+    }
+  };
+
   return (
     <Box p={4}>
-      <Header onAddCustomer={handleAddCustomer} />
+      <Toaster />
+
+      <Header onAddCustomer={handleAddCustomer} onGenerateReport={handleGenerateReport} />
       <Filters
         filterText={filterText}
         onFilterTextChange={setFilterText}
         status={status}
         onStatusChange={setStatus}
       />
-      <CustomerTable customers={customers} />
+      <CustomerTable customers={customers} onDeleteCustomer={deleteCustomer} />
     </Box>
   );
 }

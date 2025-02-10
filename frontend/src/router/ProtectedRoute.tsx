@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/context/AuthContext";
+import Fallback from "@/components/ui/fallback";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -12,7 +13,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }
   }, [loading, user]);
 
-  return loading ? <p>Loading...</p> : <>{children}</>;
+  return loading ? <Fallback isLoading={loading} /> : <>{children}</>;
 };
 
 export default ProtectedRoute;

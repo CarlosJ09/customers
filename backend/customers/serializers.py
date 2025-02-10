@@ -57,8 +57,25 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        addresses_data = validated_data.pop("addresses")
+        addresses_data = validated_data.pop("addresses", [])
         customer = Customer.objects.create(**validated_data)
+
         for address_data in addresses_data:
-            Address.objects.create(customer=customer, **address_data)
+            city_instance = address_data.pop("city")  # Extract city instance
+            Address.objects.create(customer=customer, city=city_instance, **address_data)
+
         return customer
+
+    def update(self, instance, validated_data):
+        addresses_data = validated_data.pop("addresses", [])
+        instance.name = validated_data.get("name", instance.name)
+        instance.email = validated_data.get("email", instance.email)
+        instance.phone = validated_data.get("phone", instance.phone)
+        instance.save()
+
+        instance.addresses.all().delete()
+        for address_data in addresses_data:
+            city_instance = address_data.pop("city")
+            Address.objects.create(customer=instance, city=city_instance, **address_data)
+
+        return instance

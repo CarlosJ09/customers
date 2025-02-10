@@ -1,14 +1,14 @@
 import { api } from "@/interceptor/axios";
-import { Customer, CustomerRequest } from "@/types/customer";
+import { Customer, CustomerResponse, CustomerRequest } from "@/types/customer";
 
 export const customerService = {
   getAll: async () => {
-    const response = await api.get<Customer[]>("/customers/");
+    const response = await api.get<CustomerResponse[]>("/customers/");
     return response;
   },
 
   getById: async (id: number) => {
-    const response = await api.get<Customer>(`/customers/${id}/`);
+    const response = await api.get<CustomerResponse>(`/customers/${id}/`);
     return response;
   },
 
@@ -23,7 +23,7 @@ export const customerService = {
   },
 
   delete: async (id: number) => {
-    await api.delete(`/customers/${id}/`);
-    return { success: true };
+    const response = await api.delete(`/customers/${id}/`);
+    return response;
   },
 };

@@ -1,3 +1,11 @@
+export interface AddressForm {
+  id: number;
+  countryId: number | null;
+  stateId: number | null;
+  cityId: number | null;
+  street: string;
+  postalCode: string;
+}
 export interface Country {
   id: number;
   name: string;

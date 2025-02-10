@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/action-bar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Customer } from "@/types/customer";
+import { Link } from "react-router";
 
 type CustomerTableProps = {
   customers: Customer[];
+  onDeleteCustomer: (id: number) => void;
 };
 
-function CustomerTable({ customers = [] }: CustomerTableProps) {
+function CustomerTable({ customers = [], onDeleteCustomer }: CustomerTableProps) {
   const [selection, setSelection] = useState<number[]>([]);
 
   const hasSelection = selection.length > 0;
@@ -91,11 +93,21 @@ function CustomerTable({ customers = [] }: CustomerTableProps) {
           <ActionBarSelectionTrigger>{selection.length} selected</ActionBarSelectionTrigger>
           <ActionBarSeparator />
           {selection.length <= 1 && (
-            <Button variant="outline" size="sm">
-              Go to Detail
-            </Button>
+            <Link to={`/customers/${selection[0]}`}>
+              <Button variant="outline" size="sm">
+                Go to Detail
+              </Button>
+            </Link>
           )}
-          <Button colorPalette={"red"} variant="solid" size="sm">
+          <Button
+            onClick={() => {
+              onDeleteCustomer(selection[0]);
+              setSelection([]);
+            }}
+            colorPalette={"red"}
+            variant="solid"
+            size="sm"
+          >
             Delete
           </Button>
         </ActionBarContent>
