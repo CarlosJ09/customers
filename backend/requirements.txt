@@ -6,3 +6,6 @@ markdown==3.7
 django-filter==24.3
 drf-spectacular==0.28.0
 django-cors-headers==4.7.0
+pandas==2.2.3
+openpyxl==3.1.5
+xlsxwriter==3.2.2

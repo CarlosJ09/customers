@@ -13,6 +13,9 @@ from ..serializers import (
     CitySerializer,
     AddressSerializer,
 )
+from django.http import HttpResponse
+import pandas as pd
+import io
 
 
 class BaseViewSet(viewsets.ModelViewSet):
@@ -58,6 +61,132 @@ class CustomerViewSet(BaseViewSet):
                 {"error": "No customers found with the provided IDs."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+    @action(detail=False, methods=["get"])
+    def generate_report(self, request):
+        """Generate an Excel report for all customers with multiple address handling"""
+        customers = self.get_queryset()
+        format_type = request.query_params.get("format", "separate_rows")
+
+        if format_type == "separate_rows":
+
+            customer_data = []
+            for customer in customers:
+                addresses = customer.addresses.all()
+                if addresses.exists():
+                    for address in addresses:
+                        customer_data.append(
+                            {
+                                "Customer ID": customer.id,
+                                "Name": customer.name,
+                                "Email": customer.email,
+                                "Phone": customer.phone or "",
+                                "Created At": customer.created_at.strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                ),
+                                "Address ID": address.id,
+                                "Street": address.street,
+                                "City": address.city.name,
+                                "State": address.city.state.name,
+                                "Country": address.city.state.country.name,
+                                "Zip Code": address.zip_code or "",
+                            }
+                        )
+                else:
+
+                    customer_data.append(
+                        {
+                            "Customer ID": customer.id,
+                            "Name": customer.name,
+                            "Email": customer.email,
+                            "Phone": customer.phone or "",
+                            "Created At": customer.created_at.strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            "Address ID": "",
+                            "Street": "",
+                            "City": "",
+                            "State": "",
+                            "Country": "",
+                            "Zip Code": "",
+                        }
+                    )
+        else:
+
+            customer_data = []
+            for customer in customers:
+                addresses = customer.addresses.all()
+                addresses_info = []
+                cities = []
+                states = []
+                countries = []
+                zip_codes = []
+
+                if addresses.exists():
+                    for address in addresses:
+                        addresses_info.append(address.street)
+                        cities.append(address.city.name)
+                        states.append(address.city.state.name)
+                        countries.append(address.city.state.country.name)
+                        zip_codes.append(address.zip_code or "")
+
+                customer_data.append(
+                    {
+                        "Customer ID": customer.id,
+                        "Name": customer.name,
+                        "Email": customer.email,
+                        "Phone": customer.phone or "",
+                        "Created At": customer.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                        "Streets": " | ".join(addresses_info) if addresses_info else "",
+                        "Cities": " | ".join(cities) if cities else "",
+                        "States": " | ".join(states) if states else "",
+                        "Countries": " | ".join(countries) if countries else "",
+                        "Zip Codes": " | ".join(zip_codes) if zip_codes else "",
+                    }
+                )
+
+        df = pd.DataFrame(customer_data)
+
+        excel_file = io.BytesIO()
+
+        with pd.ExcelWriter(excel_file, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False, sheet_name="Customers")
+
+            worksheet = writer.sheets["Customers"]
+
+            for idx, col in enumerate(df.columns):
+                series = df[col]
+                max_length = (
+                    max(
+                        series.astype(str).map(len).max(),
+                        len(str(series.name)),
+                    )
+                    + 2
+                )
+                worksheet.set_column(idx, idx, max_length)
+
+                if format_type == "combined" and col in [
+                    "Streets",
+                    "Cities",
+                    "States",
+                    "Countries",
+                    "Zip Codes",
+                ]:
+                    worksheet.set_column(
+                        idx,
+                        idx,
+                        max_length,
+                        writer.book.add_format({"text_wrap": True}),
+                    )
+
+        excel_file.seek(0)
+
+        response = HttpResponse(
+            excel_file.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="customer_report.xlsx"'
+        return response
 
 
 class CountryViewSet(BaseViewSet):
